@@ -44,6 +44,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -100,6 +101,7 @@ public abstract class CameraActivity extends AppCompatActivity
   private Spinner modelSpinner;
   private Spinner deviceSpinner;
   private TextView threadsTextView;
+  private ImageButton snipCameraButton;
 
   private Classifier.Model model = Classifier.Model.QUANTIZED;
   private Classifier.Device device = Classifier.Device.CPU;
@@ -131,6 +133,7 @@ public abstract class CameraActivity extends AppCompatActivity
     gestureLayout = findViewById(R.id.gesture_layout);
     sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
     bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
+    snipCameraButton = findViewById(R.id.snip_camera_tool);
 
     ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
     vto.addOnGlobalLayoutListener(
@@ -146,6 +149,7 @@ public abstract class CameraActivity extends AppCompatActivity
             int height = gestureLayout.getMeasuredHeight();
 
             sheetBehavior.setPeekHeight(height);
+            sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
           }
         });
     sheetBehavior.setHideable(true);
@@ -202,6 +206,15 @@ public abstract class CameraActivity extends AppCompatActivity
     model = Classifier.Model.valueOf(modelSpinner.getSelectedItem().toString().toUpperCase());
     device = Classifier.Device.valueOf(deviceSpinner.getSelectedItem().toString());
     numThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
+
+
+    snipCameraButton.setOnClickListener( new View.OnClickListener(){ // кнопка для снятия фото (открыть список и остановить фреймрейт, запустить отправку на сервака фото)
+      @Override
+      public void onClick(View v) {
+        sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+      }
+    });
+
   }
 
   protected int[] getRgbBytes() {
