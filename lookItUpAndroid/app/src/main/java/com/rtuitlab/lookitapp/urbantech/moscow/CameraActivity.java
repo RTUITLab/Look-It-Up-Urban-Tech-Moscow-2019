@@ -53,7 +53,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.rtuitlab.lookitapp.urbantech.moscow.env.ImageUtils;
-import com.rtuitlab.lookitapp.urbantech.moscow.tflite.Classifier;
+
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -120,9 +120,6 @@ public abstract class CameraActivity extends AppCompatActivity
       requestPermission();
     }
 
-    threadsTextView = findViewById(R.id.threads);
-    plusImageView = findViewById(R.id.plus);
-    minusImageView = findViewById(R.id.minus);
     bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
     gestureLayout = findViewById(R.id.gesture_layout);
     sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
@@ -177,18 +174,6 @@ public abstract class CameraActivity extends AppCompatActivity
           @Override
           public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
         });
-
-
-
-
-
-
-    plusImageView.setOnClickListener(this);
-    minusImageView.setOnClickListener(this);
-
-
-    numThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
-
 
     snipCameraButton.setOnClickListener( new View.OnClickListener(){ // кнопка для снятия фото (открыть список и остановить фреймрейт, запустить отправку на сервака фото)
       @Override
@@ -363,12 +348,6 @@ public abstract class CameraActivity extends AppCompatActivity
     super.onDestroy();
   }
 
-  protected synchronized void runInBackground(final Runnable r) {
-    if (handler != null) {
-      handler.post(r);
-    }
-  }
-
   @Override
   public void onRequestPermissionsResult(
       final int requestCode, final String[] permissions, final int[] grantResults) {
@@ -493,95 +472,11 @@ public abstract class CameraActivity extends AppCompatActivity
     }
   }
 
-  protected void readyForNextImage() {
-    if (postInferenceCallback != null) {
-      postInferenceCallback.run();
-    }
-  }
-
-  protected int getScreenOrientation() {
-    switch (getWindowManager().getDefaultDisplay().getRotation()) {
-      case Surface.ROTATION_270:
-        return 270;
-      case Surface.ROTATION_180:
-        return 180;
-      case Surface.ROTATION_90:
-        return 90;
-      default:
-        return 0;
-    }
-  }
-
-  @UiThread
-  protected void showResultsInBottomSheet(List<Classifier.Recognition> results) {
-    if (results != null && results.size() >= 3) {
-      Classifier.Recognition recognition = results.get(0);
-      if (recognition != null) {
-        if (recognition.getTitle() != null) recognitionTextView.setText(recognition.getTitle());
-        if (recognition.getConfidence() != null)
-          recognitionValueTextView.setText(
-              String.format("%.2f", (100 * recognition.getConfidence())) + "%");
-      }
-
-      Classifier.Recognition recognition1 = results.get(1);
-      if (recognition1 != null) {
-        if (recognition1.getTitle() != null) recognition1TextView.setText(recognition1.getTitle());
-        if (recognition1.getConfidence() != null)
-          recognition1ValueTextView.setText(
-              String.format("%.2f", (100 * recognition1.getConfidence())) + "%");
-      }
-
-      Classifier.Recognition recognition2 = results.get(2);
-      if (recognition2 != null) {
-        if (recognition2.getTitle() != null) recognition2TextView.setText(recognition2.getTitle());
-        if (recognition2.getConfidence() != null)
-          recognition2ValueTextView.setText(
-              String.format("%.2f", (100 * recognition2.getConfidence())) + "%");
-      }
-    }
-  }
-
-  protected void showFrameInfo(String frameInfo) {
-    frameValueTextView.setText(frameInfo);
-  }
-
-  protected void showCropInfo(String cropInfo) {
-    cropValueTextView.setText(cropInfo);
-  }
-
-  protected void showCameraResolution(String cameraInfo) {
-    cameraResolutionTextView.setText(cameraInfo);
-  }
-
-  protected void showRotationInfo(String rotation) {
-    rotationTextView.setText(rotation);
-  }
-
-  protected void showInference(String inferenceTime) {
-    inferenceTimeTextView.setText(inferenceTime);
-  }
-
-
-
-
-
-
-
-
-
-  protected int getNumThreads() {
-    return numThreads;
-  }
-
-
-
-
   protected abstract void onPreviewSizeChosen(final Size size, final int rotation);
 
   protected abstract int getLayoutId();
 
   protected abstract Size getDesiredPreviewFrameSize();
-
 
   @Override
   public void onClick(View v) {

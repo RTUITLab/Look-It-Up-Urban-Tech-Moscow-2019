@@ -27,14 +27,14 @@ import android.widget.Toast;
 
 import com.rtuitlab.lookitapp.urbantech.moscow.env.BorderedText;
 import com.rtuitlab.lookitapp.urbantech.moscow.env.Logger;
-import com.rtuitlab.lookitapp.urbantech.moscow.tflite.Classifier;
+
 
 import java.io.IOException;
 import java.util.List;
 
 import org.tensorflow.lite.examples.classification.R;
 
-public class ClassifierActivity extends CameraActivity implements OnImageAvailableListener {
+public class ExtendedActivity extends CameraActivity implements OnImageAvailableListener {
   private static final Logger LOGGER = new Logger();
   private static final Size DESIRED_PREVIEW_SIZE = new Size(1280, 720);
   private static final float TEXT_SIZE_DIP = 10;

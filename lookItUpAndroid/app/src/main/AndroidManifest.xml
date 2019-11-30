@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.rtuitlab.lookitapp.urbantech.moscow.ClassifierActivity"
+            android:name="com.rtuitlab.lookitapp.urbantech.moscow.ExtendedActivity"
             android:label="@string/activity_name_classification"
             android:screenOrientation="portrait">
             <intent-filter>
