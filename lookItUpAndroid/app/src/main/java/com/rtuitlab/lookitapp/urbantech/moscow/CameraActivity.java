@@ -43,6 +43,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -64,8 +65,7 @@ import com.rtuitlab.lookitapp.urbantech.moscow.env.Logger;
 public abstract class CameraActivity extends AppCompatActivity
     implements OnImageAvailableListener,
         Camera.PreviewCallback,
-        View.OnClickListener,
-        AdapterView.OnItemSelectedListener {
+        View.OnClickListener{
   private static final Logger LOGGER = new Logger();
 
   private static final int PERMISSIONS_REQUEST = 1;
@@ -98,8 +98,6 @@ public abstract class CameraActivity extends AppCompatActivity
       inferenceTimeTextView;
   protected ImageView bottomSheetArrowImageView;
   private ImageView plusImageView, minusImageView;
-  private Spinner modelSpinner;
-  private Spinner deviceSpinner;
   private TextView threadsTextView;
   private ImageButton snipCameraButton;
 
@@ -127,8 +125,6 @@ public abstract class CameraActivity extends AppCompatActivity
     threadsTextView = findViewById(R.id.threads);
     plusImageView = findViewById(R.id.plus);
     minusImageView = findViewById(R.id.minus);
-    modelSpinner = findViewById(R.id.model_spinner);
-    deviceSpinner = findViewById(R.id.device_spinner);
     bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
     gestureLayout = findViewById(R.id.gesture_layout);
     sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
@@ -187,14 +183,12 @@ public abstract class CameraActivity extends AppCompatActivity
 
 
 
-    modelSpinner.setOnItemSelectedListener(this);
-    deviceSpinner.setOnItemSelectedListener(this);
+
 
     plusImageView.setOnClickListener(this);
     minusImageView.setOnClickListener(this);
 
-    model = Classifier.Model.valueOf(modelSpinner.getSelectedItem().toString().toUpperCase());
-    device = Classifier.Device.valueOf(deviceSpinner.getSelectedItem().toString());
+
     numThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
 
 
@@ -633,17 +627,5 @@ public abstract class CameraActivity extends AppCompatActivity
     }
   }
 
-  @Override
-  public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-    if (parent == modelSpinner) {
-      setModel(Classifier.Model.valueOf(parent.getItemAtPosition(pos).toString().toUpperCase()));
-    } else if (parent == deviceSpinner) {
-      setDevice(Classifier.Device.valueOf(parent.getItemAtPosition(pos).toString()));
-    }
-  }
 
-  @Override
-  public void onNothingSelected(AdapterView<?> parent) {
-    // Do nothing.
-  }
 }
