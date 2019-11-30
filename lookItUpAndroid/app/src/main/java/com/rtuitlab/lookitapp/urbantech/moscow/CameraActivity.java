@@ -184,18 +184,8 @@ public abstract class CameraActivity extends AppCompatActivity
           public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
         });
 
-    recognitionTextView = findViewById(R.id.detected_item);
-    recognitionValueTextView = findViewById(R.id.detected_item_value);
-    recognition1TextView = findViewById(R.id.detected_item1);
-    recognition1ValueTextView = findViewById(R.id.detected_item1_value);
-    recognition2TextView = findViewById(R.id.detected_item2);
-    recognition2ValueTextView = findViewById(R.id.detected_item2_value);
 
-    frameValueTextView = findViewById(R.id.frame_info);
-    cropValueTextView = findViewById(R.id.crop_info);
-    cameraResolutionTextView = findViewById(R.id.view_info);
-    rotationTextView = findViewById(R.id.rotation_info);
-    inferenceTimeTextView = findViewById(R.id.inference_info);
+
 
     modelSpinner.setOnItemSelectedListener(this);
     deviceSpinner.setOnItemSelectedListener(this);
