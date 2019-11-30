@@ -101,8 +101,6 @@ public abstract class CameraActivity extends AppCompatActivity
   private TextView threadsTextView;
   private ImageButton snipCameraButton;
 
-  private Classifier.Model model = Classifier.Model.QUANTIZED;
-  private Classifier.Device device = Classifier.Device.CPU;
   private int numThreads = -1;
 
   @Override
@@ -563,42 +561,19 @@ public abstract class CameraActivity extends AppCompatActivity
     inferenceTimeTextView.setText(inferenceTime);
   }
 
-  protected Classifier.Model getModel() {
-    return model;
-  }
 
-  private void setModel(Classifier.Model model) {
-    if (this.model != model) {
-      LOGGER.d("Updating  model: " + model);
-      this.model = model;
-    }
-  }
 
-  protected Classifier.Device getDevice() {
-    return device;
-  }
 
-  private void setDevice(Classifier.Device device) {
-    if (this.device != device) {
-      LOGGER.d("Updating  device: " + device);
-      this.device = device;
-      final boolean threadsEnabled = device == Classifier.Device.CPU;
-      plusImageView.setEnabled(threadsEnabled);
-      minusImageView.setEnabled(threadsEnabled);
-      threadsTextView.setText(threadsEnabled ? String.valueOf(numThreads) : "N/A");
-    }
-  }
+
+
+
+
 
   protected int getNumThreads() {
     return numThreads;
   }
 
-  private void setNumThreads(int numThreads) {
-    if (this.numThreads != numThreads) {
-      LOGGER.d("Updating  numThreads: " + numThreads);
-      this.numThreads = numThreads;
-    }
-  }
+
 
 
   protected abstract void onPreviewSizeChosen(final Size size, final int rotation);
@@ -610,21 +585,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
   @Override
   public void onClick(View v) {
-    if (v.getId() == R.id.plus) {
-      String threads = threadsTextView.getText().toString().trim();
-      int numThreads = Integer.parseInt(threads);
-      if (numThreads >= 9) return;
-      setNumThreads(++numThreads);
-      threadsTextView.setText(String.valueOf(numThreads));
-    } else if (v.getId() == R.id.minus) {
-      String threads = threadsTextView.getText().toString().trim();
-      int numThreads = Integer.parseInt(threads);
-      if (numThreads == 1) {
-        return;
-      }
-      setNumThreads(--numThreads);
-      threadsTextView.setText(String.valueOf(numThreads));
-    }
+
   }
 
 
