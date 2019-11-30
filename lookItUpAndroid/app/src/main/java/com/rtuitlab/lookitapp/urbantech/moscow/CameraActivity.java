@@ -272,8 +272,7 @@ public abstract class CameraActivity extends AppCompatActivity
             isProcessingFrame = false;
           }
         };
-    processImage();
-  }
+    }
 
   /** Callback for Camera2 API */
   @Override
@@ -330,8 +329,7 @@ public abstract class CameraActivity extends AppCompatActivity
             }
           };
 
-      processImage();
-    } catch (final Exception e) {
+        } catch (final Exception e) {
       LOGGER.e(e, "Exception!");
       Trace.endSection();
       return;
@@ -589,7 +587,6 @@ public abstract class CameraActivity extends AppCompatActivity
     if (this.model != model) {
       LOGGER.d("Updating  model: " + model);
       this.model = model;
-      onInferenceConfigurationChanged();
     }
   }
 
@@ -605,7 +602,6 @@ public abstract class CameraActivity extends AppCompatActivity
       plusImageView.setEnabled(threadsEnabled);
       minusImageView.setEnabled(threadsEnabled);
       threadsTextView.setText(threadsEnabled ? String.valueOf(numThreads) : "N/A");
-      onInferenceConfigurationChanged();
     }
   }
 
@@ -617,11 +613,9 @@ public abstract class CameraActivity extends AppCompatActivity
     if (this.numThreads != numThreads) {
       LOGGER.d("Updating  numThreads: " + numThreads);
       this.numThreads = numThreads;
-      onInferenceConfigurationChanged();
     }
   }
 
-  protected abstract void processImage();
 
   protected abstract void onPreviewSizeChosen(final Size size, final int rotation);
 
@@ -629,7 +623,6 @@ public abstract class CameraActivity extends AppCompatActivity
 
   protected abstract Size getDesiredPreviewFrameSize();
 
-  protected abstract void onInferenceConfigurationChanged();
 
   @Override
   public void onClick(View v) {
