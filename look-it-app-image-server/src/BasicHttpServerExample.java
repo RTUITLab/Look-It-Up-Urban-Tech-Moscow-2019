@@ -12,6 +12,7 @@ import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import javax.imageio.ImageIO;
 
 public class BasicHttpServerExample {
+    String Link ="";
 
     public static void main(String[] args) throws IOException {
         System.out.println("Server Started");
@@ -19,7 +20,7 @@ public class BasicHttpServerExample {
         //HttpContext context = server.createContext("/img");
         server.createContext("/img", new ImageHandler());
         server.createContext("/get", new LinkHandler());
-        server.createContext("/test", new StaticHandler("/test", "C:/Users/Nikita/IdeaProjects/untitled3/web"));
+        server.createContext("/test", new StaticHandler("/test", "C:/Users/Nikita/IdeaProjects/look-it-app-image-server_v2/web"));
         server.setExecutor(null);
 
         //context.setHandler(BasicHttpServerExample::handleRequest);
@@ -33,13 +34,26 @@ public class BasicHttpServerExample {
 
     static class LinkHandler implements HttpHandler {
         public void handle(HttpExchange exchange) throws IOException {
-            URI requestURI = exchange.getRequestURI();
+            //FileInputStream fileInputStream = new FileInputStream("C:/Users/Nikita/IdeaProjects/look-it-app-image-server_v2/web/BigLink.txt");
+            //BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream, 200);
+            //URI requestURI = exchange.getRequestURI();
+            //String response = requestURI.toString();
 
-            String response = requestURI.toString();
-
-            exchange.sendResponseHeaders(200, response.getBytes().length);
+            File file = new File("C:/Users/Nikita/IdeaProjects/look-it-app-image-server_v2/web/BigLink.txt");
+            //создаем объект FileReader для объекта File
+            FileReader fr = new FileReader(file);
+            //создаем BufferedReader с существующего FileReader для построчного считывания
+            BufferedReader reader = new BufferedReader(fr);
+            String str = reader.readLine();
+            System.out.println(str);
+            // считаем сначала первую строку
+            exchange.sendResponseHeaders(200, str.length());
             OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
+
+            for(int i = 0; i < str.length(); i++)
+            {
+                os.write(str.getBytes());
+            }
             os.close();
         }
 
@@ -52,20 +66,21 @@ public class BasicHttpServerExample {
             Headers requestHeaders = exchange.getRequestHeaders();
 
             String response = requestURI.toString();
-
+            System.out.println("Start out");
             exchange.sendResponseHeaders(200, response.getBytes().length);
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
             os.close();
-
+            System.out.println("End out");
+            System.out.println("Start img");
             String base64String = requestHeaders.get("img").toString();
-            String directory = "C:/Users/Nikita/IdeaProjects/untitled3/web";
+            String directory = "C:/Users/Nikita/IdeaProjects/look-it-app-image-server_v2/web";
 
             l = base64String.length();
 
             String base = base64String.substring(1, l - 1);
             byte[] resByteArray = Base64.decode(base);
-
+            System.out.println("Buff img");
             BufferedImage resultImage = ImageIO.read(new ByteArrayInputStream(resByteArray));
 
             ImageIO.write(resultImage, "jpg", new File(directory, "resultImage.jpg"));
@@ -74,6 +89,14 @@ public class BasicHttpServerExample {
             System.out.println("Start link");
             DelLink(link);
 
+        }
+
+        private static  void FileLink(String str_big_link) throws IOException {
+            System.out.println(str_big_link);
+            FileOutputStream fos = new FileOutputStream("C:/Users/Nikita/IdeaProjects/look-it-app-image-server_v2/web/BigLink.txt");
+            fos.write(str_big_link.getBytes());
+            fos.flush();
+            fos.close();
         }
 
         private static void BackgroundDel()
@@ -127,10 +150,15 @@ public class BasicHttpServerExample {
             }
 
             String str_big_link = "";
-            for(int i = 0; i<m.size(); i++) {
-                str_big_link = str_big_link + ";" + m.get(i);
+            for(int i = 0; i < m.size(); i++) {
+                str_big_link = str_big_link  + m.get(i);
+                if(i != m.size()-1)
+                {
+                    str_big_link += ";";
+                }
                 System.out.println(m.get(i));
             }
+            FileLink(str_big_link);
             System.out.println("All");
 
         }
