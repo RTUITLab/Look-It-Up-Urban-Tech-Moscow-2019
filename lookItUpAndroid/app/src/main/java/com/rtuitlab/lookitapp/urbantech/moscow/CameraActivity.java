@@ -19,6 +19,7 @@ package com.rtuitlab.lookitapp.urbantech.moscow;
 import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
@@ -35,31 +36,38 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Trace;
 import androidx.annotation.NonNull;
-import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
+
+import android.util.Log;
 import android.util.Size;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.Adapter;
-import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.rtuitlab.lookitapp.urbantech.moscow.customview.ItemClassAdapter;
 import com.rtuitlab.lookitapp.urbantech.moscow.env.ImageUtils;
 
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.nio.ByteBuffer;
-import java.util.List;
 
 import org.tensorflow.lite.examples.classification.R;
 
+import com.rtuitlab.lookitapp.urbantech.moscow.env.ItemClass;
 import com.rtuitlab.lookitapp.urbantech.moscow.env.Logger;
 
 public abstract class CameraActivity extends AppCompatActivity
@@ -71,6 +79,8 @@ public abstract class CameraActivity extends AppCompatActivity
   private static final int PERMISSIONS_REQUEST = 1;
 
   private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
+  public static final String TAG = "CameraAcrivity";
+  private static final int PICK_IMAGE_REQUEST_CODE = 1;
   protected int previewWidth = 0;
   protected int previewHeight = 0;
   private Handler handler;
@@ -96,12 +106,14 @@ public abstract class CameraActivity extends AppCompatActivity
       cameraResolutionTextView,
       rotationTextView,
       inferenceTimeTextView;
-  protected ImageView bottomSheetArrowImageView;
+  //protected ImageView bottomSheetArrowImageView;
   private ImageView plusImageView, minusImageView;
   private TextView threadsTextView;
   private ImageButton snipCameraButton;
+  private ImageButton closeLayoutBottomSheet;
 
-  private int numThreads = -1;
+  private FragmentManager fragmentManager;
+  private boolean notCameraFragmentRunning;
 
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
@@ -123,8 +135,9 @@ public abstract class CameraActivity extends AppCompatActivity
     bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
     gestureLayout = findViewById(R.id.gesture_layout);
     sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
-    bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
+    //bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
     snipCameraButton = findViewById(R.id.snip_camera_tool);
+    closeLayoutBottomSheet = (ImageButton) findViewById(R.id.close_layout_bottom_button);
 
     ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
     vto.addOnGlobalLayoutListener(
@@ -152,21 +165,26 @@ public abstract class CameraActivity extends AppCompatActivity
             switch (newState) {
               case BottomSheetBehavior.STATE_HIDDEN:
                // sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                if(notCameraFragmentRunning) snipCameraButton.setVisibility(View.GONE);
+                else snipCameraButton.setVisibility(View.VISIBLE);
                 break;
               case BottomSheetBehavior.STATE_EXPANDED:
                 {
-                  bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
+                  snipCameraButton.setVisibility(View.GONE);
+                  //bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
                 }
                 break;
               case BottomSheetBehavior.STATE_COLLAPSED:
                 {
-                  bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
+                  //bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
                 }
                 break;
               case BottomSheetBehavior.STATE_DRAGGING:
+                snipCameraButton.setVisibility(View.GONE);
                 break;
               case BottomSheetBehavior.STATE_SETTLING:
-                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
+                  snipCameraButton.setVisibility(View.GONE);
+                //bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
                 break;
             }
           }
@@ -179,10 +197,83 @@ public abstract class CameraActivity extends AppCompatActivity
       @Override
       public void onClick(View v) {
         sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        // запросить какие классы найдены и засетапить их в кнопки на layout_bottom_sheet
+
+      }
+    });
+
+    // Создание адаптера и инициализация данных для заглушки
+    ItemClassAdapter itemClassAdapter = new ItemClassAdapter(this, getDebugItemList());
+    ListView itemListView = (ListView) findViewById(R.id.listView);
+    itemListView.setAdapter(itemClassAdapter);
+    //конец адаптера
+
+    choiceFootFromGalleryAbilityAdd();//добавляет возможность звать в гости галлерею, результат обработается в onActivityResult
+    findViewById(R.id.send_request).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        try {
+          sendDebugImageFromCam(getRgbBytes());
+        }
+        catch (IOException e) {
+          e.printStackTrace();
+        }
       }
     });
 
   }
+
+
+  private void sendDebugImageFromCam (int[] bytes) throws IOException {
+    Runnable process = new Runnable() {
+      @Override
+      public void run() {
+        final URL url;
+        try {
+          url = new URL("http://192.168.43.5:8000/img");
+        final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+          con.setRequestMethod("POST");
+          con.addRequestProperty("Img",bytes.toString());
+          con.setDoOutput(true);
+
+          //con.getInputStream();
+
+          try (
+                  final BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+            String inputLine;
+            final StringBuilder content = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+              content.append(inputLine);
+            }
+            Log.v(TAG, content.toString());
+          } catch (final Exception ex) {
+            ex.printStackTrace();
+          }
+
+        }
+        catch (MalformedURLException e) { e.printStackTrace();}
+        catch (ProtocolException e)     { e.printStackTrace();}
+        catch (IOException e)           {e.printStackTrace();}
+
+
+      }
+    };
+    process.run();
+  }
+
+  private void choiceFootFromGalleryAbilityAdd(){ //поднятие вопроса к галлерее
+    findViewById(R.id.selectImageButton).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Intent intent = new Intent(
+                Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST_CODE);
+      }
+    }
+
+    );
+  }
+
 
   protected int[] getRgbBytes() {
     imageConverter.run();
@@ -240,6 +331,17 @@ public abstract class CameraActivity extends AppCompatActivity
           }
         };
     }
+
+     private ItemClass[] getDebugItemList(){// дебаг данные для листа найденной одежды
+        ItemClass[] itemClasses = new ItemClass[5];
+
+        String[] classArr = {"Кофта", "Пальто", "Джинсы", "Кросовки", "Очки"};
+
+        for(int i = 0; i< itemClasses.length; i++ ){
+          itemClasses[i] = new ItemClass(classArr[i]);
+        }
+        return itemClasses;
+     }
 
   /** Callback for Camera2 API */
   @Override
@@ -483,5 +585,15 @@ public abstract class CameraActivity extends AppCompatActivity
 
   }
 
+  @Override
+  public void onBackPressed() {
+    super.onBackPressed();
+    notCameraFragmentRunning = false;
+    snipCameraButton.setVisibility(View.VISIBLE);
+  }
+
+  public void CloseBottomBoard(View view){// крестик в правом углу вылетающей панели
+    sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+  }
 
 }
