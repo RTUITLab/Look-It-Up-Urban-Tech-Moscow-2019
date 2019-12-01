@@ -43,7 +43,9 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.Adapter;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -51,7 +53,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.rtuitlab.lookitapp.urbantech.moscow.env.ImageUtils;
-import com.rtuitlab.lookitapp.urbantech.moscow.tflite.Classifier;
+
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -63,8 +65,7 @@ import com.rtuitlab.lookitapp.urbantech.moscow.env.Logger;
 public abstract class CameraActivity extends AppCompatActivity
     implements OnImageAvailableListener,
         Camera.PreviewCallback,
-        View.OnClickListener,
-        AdapterView.OnItemSelectedListener {
+        View.OnClickListener{
   private static final Logger LOGGER = new Logger();
 
   private static final int PERMISSIONS_REQUEST = 1;
@@ -97,12 +98,9 @@ public abstract class CameraActivity extends AppCompatActivity
       inferenceTimeTextView;
   protected ImageView bottomSheetArrowImageView;
   private ImageView plusImageView, minusImageView;
-  private Spinner modelSpinner;
-  private Spinner deviceSpinner;
   private TextView threadsTextView;
+  private ImageButton snipCameraButton;
 
-  private Classifier.Model model = Classifier.Model.QUANTIZED;
-  private Classifier.Device device = Classifier.Device.CPU;
   private int numThreads = -1;
 
   @Override
@@ -122,15 +120,11 @@ public abstract class CameraActivity extends AppCompatActivity
       requestPermission();
     }
 
-    threadsTextView = findViewById(R.id.threads);
-    plusImageView = findViewById(R.id.plus);
-    minusImageView = findViewById(R.id.minus);
-    modelSpinner = findViewById(R.id.model_spinner);
-    deviceSpinner = findViewById(R.id.device_spinner);
     bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
     gestureLayout = findViewById(R.id.gesture_layout);
     sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
     bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
+    snipCameraButton = findViewById(R.id.snip_camera_tool);
 
     ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
     vto.addOnGlobalLayoutListener(
@@ -146,6 +140,7 @@ public abstract class CameraActivity extends AppCompatActivity
             int height = gestureLayout.getMeasuredHeight();
 
             sheetBehavior.setPeekHeight(height);
+            sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
           }
         });
     sheetBehavior.setHideable(true);
@@ -180,28 +175,13 @@ public abstract class CameraActivity extends AppCompatActivity
           public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
         });
 
-    recognitionTextView = findViewById(R.id.detected_item);
-    recognitionValueTextView = findViewById(R.id.detected_item_value);
-    recognition1TextView = findViewById(R.id.detected_item1);
-    recognition1ValueTextView = findViewById(R.id.detected_item1_value);
-    recognition2TextView = findViewById(R.id.detected_item2);
-    recognition2ValueTextView = findViewById(R.id.detected_item2_value);
+    snipCameraButton.setOnClickListener( new View.OnClickListener(){ // кнопка для снятия фото (открыть список и остановить фреймрейт, запустить отправку на сервака фото)
+      @Override
+      public void onClick(View v) {
+        sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+      }
+    });
 
-    frameValueTextView = findViewById(R.id.frame_info);
-    cropValueTextView = findViewById(R.id.crop_info);
-    cameraResolutionTextView = findViewById(R.id.view_info);
-    rotationTextView = findViewById(R.id.rotation_info);
-    inferenceTimeTextView = findViewById(R.id.inference_info);
-
-    modelSpinner.setOnItemSelectedListener(this);
-    deviceSpinner.setOnItemSelectedListener(this);
-
-    plusImageView.setOnClickListener(this);
-    minusImageView.setOnClickListener(this);
-
-    model = Classifier.Model.valueOf(modelSpinner.getSelectedItem().toString().toUpperCase());
-    device = Classifier.Device.valueOf(deviceSpinner.getSelectedItem().toString());
-    numThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
   }
 
   protected int[] getRgbBytes() {
@@ -259,8 +239,7 @@ public abstract class CameraActivity extends AppCompatActivity
             isProcessingFrame = false;
           }
         };
-    processImage();
-  }
+    }
 
   /** Callback for Camera2 API */
   @Override
@@ -317,8 +296,7 @@ public abstract class CameraActivity extends AppCompatActivity
             }
           };
 
-      processImage();
-    } catch (final Exception e) {
+        } catch (final Exception e) {
       LOGGER.e(e, "Exception!");
       Trace.endSection();
       return;
@@ -368,12 +346,6 @@ public abstract class CameraActivity extends AppCompatActivity
   public synchronized void onDestroy() {
     LOGGER.d("onDestroy " + this);
     super.onDestroy();
-  }
-
-  protected synchronized void runInBackground(final Runnable r) {
-    if (handler != null) {
-      handler.post(r);
-    }
   }
 
   @Override
@@ -500,154 +472,16 @@ public abstract class CameraActivity extends AppCompatActivity
     }
   }
 
-  protected void readyForNextImage() {
-    if (postInferenceCallback != null) {
-      postInferenceCallback.run();
-    }
-  }
-
-  protected int getScreenOrientation() {
-    switch (getWindowManager().getDefaultDisplay().getRotation()) {
-      case Surface.ROTATION_270:
-        return 270;
-      case Surface.ROTATION_180:
-        return 180;
-      case Surface.ROTATION_90:
-        return 90;
-      default:
-        return 0;
-    }
-  }
-
-  @UiThread
-  protected void showResultsInBottomSheet(List<Classifier.Recognition> results) {
-    if (results != null && results.size() >= 3) {
-      Classifier.Recognition recognition = results.get(0);
-      if (recognition != null) {
-        if (recognition.getTitle() != null) recognitionTextView.setText(recognition.getTitle());
-        if (recognition.getConfidence() != null)
-          recognitionValueTextView.setText(
-              String.format("%.2f", (100 * recognition.getConfidence())) + "%");
-      }
-
-      Classifier.Recognition recognition1 = results.get(1);
-      if (recognition1 != null) {
-        if (recognition1.getTitle() != null) recognition1TextView.setText(recognition1.getTitle());
-        if (recognition1.getConfidence() != null)
-          recognition1ValueTextView.setText(
-              String.format("%.2f", (100 * recognition1.getConfidence())) + "%");
-      }
-
-      Classifier.Recognition recognition2 = results.get(2);
-      if (recognition2 != null) {
-        if (recognition2.getTitle() != null) recognition2TextView.setText(recognition2.getTitle());
-        if (recognition2.getConfidence() != null)
-          recognition2ValueTextView.setText(
-              String.format("%.2f", (100 * recognition2.getConfidence())) + "%");
-      }
-    }
-  }
-
-  protected void showFrameInfo(String frameInfo) {
-    frameValueTextView.setText(frameInfo);
-  }
-
-  protected void showCropInfo(String cropInfo) {
-    cropValueTextView.setText(cropInfo);
-  }
-
-  protected void showCameraResolution(String cameraInfo) {
-    cameraResolutionTextView.setText(cameraInfo);
-  }
-
-  protected void showRotationInfo(String rotation) {
-    rotationTextView.setText(rotation);
-  }
-
-  protected void showInference(String inferenceTime) {
-    inferenceTimeTextView.setText(inferenceTime);
-  }
-
-  protected Classifier.Model getModel() {
-    return model;
-  }
-
-  private void setModel(Classifier.Model model) {
-    if (this.model != model) {
-      LOGGER.d("Updating  model: " + model);
-      this.model = model;
-      onInferenceConfigurationChanged();
-    }
-  }
-
-  protected Classifier.Device getDevice() {
-    return device;
-  }
-
-  private void setDevice(Classifier.Device device) {
-    if (this.device != device) {
-      LOGGER.d("Updating  device: " + device);
-      this.device = device;
-      final boolean threadsEnabled = device == Classifier.Device.CPU;
-      plusImageView.setEnabled(threadsEnabled);
-      minusImageView.setEnabled(threadsEnabled);
-      threadsTextView.setText(threadsEnabled ? String.valueOf(numThreads) : "N/A");
-      onInferenceConfigurationChanged();
-    }
-  }
-
-  protected int getNumThreads() {
-    return numThreads;
-  }
-
-  private void setNumThreads(int numThreads) {
-    if (this.numThreads != numThreads) {
-      LOGGER.d("Updating  numThreads: " + numThreads);
-      this.numThreads = numThreads;
-      onInferenceConfigurationChanged();
-    }
-  }
-
-  protected abstract void processImage();
-
   protected abstract void onPreviewSizeChosen(final Size size, final int rotation);
 
   protected abstract int getLayoutId();
 
   protected abstract Size getDesiredPreviewFrameSize();
 
-  protected abstract void onInferenceConfigurationChanged();
-
   @Override
   public void onClick(View v) {
-    if (v.getId() == R.id.plus) {
-      String threads = threadsTextView.getText().toString().trim();
-      int numThreads = Integer.parseInt(threads);
-      if (numThreads >= 9) return;
-      setNumThreads(++numThreads);
-      threadsTextView.setText(String.valueOf(numThreads));
-    } else if (v.getId() == R.id.minus) {
-      String threads = threadsTextView.getText().toString().trim();
-      int numThreads = Integer.parseInt(threads);
-      if (numThreads == 1) {
-        return;
-      }
-      setNumThreads(--numThreads);
-      threadsTextView.setText(String.valueOf(numThreads));
-    }
+
   }
 
-  @Override
-  public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-    if (parent == modelSpinner) {
-      setModel(Classifier.Model.valueOf(parent.getItemAtPosition(pos).toString().toUpperCase()));
-    } else if (parent == deviceSpinner) {
-      setDevice(Classifier.Device.valueOf(parent.getItemAtPosition(pos).toString()));
-    }
-  }
 
-  @Override
-  public void onNothingSelected(AdapterView<?> parent) {
-    // Do nothing.
-  }
 }

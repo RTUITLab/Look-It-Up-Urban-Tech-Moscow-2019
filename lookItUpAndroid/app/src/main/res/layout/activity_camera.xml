@@ -14,6 +14,7 @@
  limitations under the License.
 -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -33,6 +34,19 @@
             android:background="@android:color/black"
             tools:context="org.tensorflow.lite.examples.classification.com.tensorflow.lite.examples.classification.CameraActivity">
 
+            <ImageButton
+                android:id="@+id/snip_camera_tool"
+                style="@style/Widget.AppCompat.ImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:layout_marginBottom="@dimen/bottom_sheet_corner_radius"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/activity_name_classification"
+                android:elevation="2dp"
+                app:srcCompat="@drawable/camera_button"
+                tools:srcCompat="@drawable/camera_button" />
+
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
@@ -45,5 +59,6 @@
 
     <include
         android:id="@+id/bottom_sheet_layout"
-        layout="@layout/layout_bottom_sheet" />
+        layout="@layout/layout_bottom_sheet"
+        android:elevation="8dp" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
