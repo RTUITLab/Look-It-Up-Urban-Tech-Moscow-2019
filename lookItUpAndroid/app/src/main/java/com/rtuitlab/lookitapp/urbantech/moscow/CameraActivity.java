@@ -195,23 +195,19 @@ public abstract class CameraActivity extends AppCompatActivity
       public void onClick(View v) {
         sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         // запросить какие классы найдены и засетапить их в кнопки на layout_bottom_sheet
+        
       }
     });
 
-<<<<<<< Updated upstream
-    // Создание адаптера и инициализация данных для заглушки
 
-    //конец адаптера
-=======
-//<<<<<<< Updated upstream
-//=======
+
+
     // Создание адаптера и инициализация данных для заглушки
     ItemClassAdapter itemClassAdapter = new ItemClassAdapter(this, getDebugItemList());
     ListView itemListView = (ListView) findViewById(R.id.listView);
     itemListView.setAdapter(itemClassAdapter);
     //конец адаптера
-//>>>>>>> Stashed changes
->>>>>>> Stashed changes
+
   }
 
   protected int[] getRgbBytes() {
@@ -524,11 +520,6 @@ public abstract class CameraActivity extends AppCompatActivity
 
   }
 
-<<<<<<< Updated upstream
-=======
-//<<<<<<< Updated upstream
-//=======
->>>>>>> Stashed changes
   @Override
   public void onBackPressed() {
     super.onBackPressed();
@@ -536,15 +527,8 @@ public abstract class CameraActivity extends AppCompatActivity
     snipCameraButton.setVisibility(View.VISIBLE);
   }
 
-<<<<<<< Updated upstream
-  public void CloseBottomBoard(View view){
-    sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-  }
-=======
   public void CloseBottomBoard(View view){// крестик в правом углу вылетающей панели
     sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
   }
-//>>>>>>> Stashed changes
->>>>>>> Stashed changes
 
 }

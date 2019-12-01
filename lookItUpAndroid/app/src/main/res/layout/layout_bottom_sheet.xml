@@ -29,8 +29,8 @@
 
         <TextView
             android:id="@+id/textView"
-            android:layout_width="44dp"
-            android:layout_height="wrap_content"
+            android:layout_width="114dp"
+            android:layout_height="32dp"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:fontFamily="@font/roboto"
@@ -38,15 +38,9 @@
             android:text="Найти одежду"
             android:textSize="13sp" />
 
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="33dp"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1" />
-
         <ImageButton
             android:id="@+id/close_layout_bottom_button"
-            android:layout_width="wrap_content"
+            android:layout_width="113dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
@@ -61,8 +55,13 @@
     <View
         android:id="@+id/view2"
         android:layout_width="match_parent"
-<<<<<<< Updated upstream
         android:layout_height="20dp" />
+
+    <ListView android:id="@+id/listView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </ListView>
 
     <View
         android:layout_width="match_parent"
@@ -71,27 +70,12 @@
         android:background="@android:color/darker_gray" />
 
 
-
-=======
-        android:layout_height="1px"
-        android:layout_marginTop="10dp"
-        android:background="@android:color/darker_gray" />
-
-    <ListView android:id="@+id/listView">
-
-    </ListView>
-
-
->>>>>>> Stashed changes
     <View
         android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-<<<<<<< Updated upstream
+
         android:layout_marginTop="8dp"
         android:background="@android:color/transparent" />
-=======
-        android:orientation="horizontal" />
->>>>>>> Stashed changes
 
 </LinearLayout>
