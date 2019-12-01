@@ -30,6 +30,7 @@ RTUITLab
 ![app demo](demo/demo.gif)
 
 Здесь вставлено демо, оно очень долго загружается :)
+Please whait a while...
 
 [Android]:https://www.android.com/
 [Java]:https://www.java.com/
