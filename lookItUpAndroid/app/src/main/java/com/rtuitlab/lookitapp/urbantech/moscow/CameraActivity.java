@@ -71,6 +71,7 @@ public abstract class CameraActivity extends AppCompatActivity
   private static final int PERMISSIONS_REQUEST = 1;
 
   private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
+  public static final String TAG = "CameraAcrivity";
   protected int previewWidth = 0;
   protected int previewHeight = 0;
   private Handler handler;
@@ -96,12 +97,14 @@ public abstract class CameraActivity extends AppCompatActivity
       cameraResolutionTextView,
       rotationTextView,
       inferenceTimeTextView;
-  protected ImageView bottomSheetArrowImageView;
+  //protected ImageView bottomSheetArrowImageView;
   private ImageView plusImageView, minusImageView;
   private TextView threadsTextView;
   private ImageButton snipCameraButton;
+  private ImageButton closeLayoutBottomSheet;
 
-  private int numThreads = -1;
+  private FragmentManager fragmentManager;
+  private boolean notCameraFragmentRunning;
 
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
@@ -123,8 +126,9 @@ public abstract class CameraActivity extends AppCompatActivity
     bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
     gestureLayout = findViewById(R.id.gesture_layout);
     sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
-    bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
+    //bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
     snipCameraButton = findViewById(R.id.snip_camera_tool);
+    closeLayoutBottomSheet = (ImageButton) findViewById(R.id.close_layout_bottom_button);
 
     ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
     vto.addOnGlobalLayoutListener(
@@ -152,21 +156,26 @@ public abstract class CameraActivity extends AppCompatActivity
             switch (newState) {
               case BottomSheetBehavior.STATE_HIDDEN:
                // sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                if(notCameraFragmentRunning) snipCameraButton.setVisibility(View.GONE);
+                else snipCameraButton.setVisibility(View.VISIBLE);
                 break;
               case BottomSheetBehavior.STATE_EXPANDED:
                 {
-                  bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
+                  snipCameraButton.setVisibility(View.GONE);
+                  //bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
                 }
                 break;
               case BottomSheetBehavior.STATE_COLLAPSED:
                 {
-                  bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
+                  //bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
                 }
                 break;
               case BottomSheetBehavior.STATE_DRAGGING:
+                snipCameraButton.setVisibility(View.GONE);
                 break;
               case BottomSheetBehavior.STATE_SETTLING:
-                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
+                  snipCameraButton.setVisibility(View.GONE);
+                //bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
                 break;
             }
           }
@@ -179,6 +188,7 @@ public abstract class CameraActivity extends AppCompatActivity
       @Override
       public void onClick(View v) {
         sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        // запросить какие классы найдены и засетапить их в кнопки на layout_bottom_sheet
       }
     });
 
@@ -483,5 +493,11 @@ public abstract class CameraActivity extends AppCompatActivity
 
   }
 
+  @Override
+  public void onBackPressed() {
+    super.onBackPressed();
+    notCameraFragmentRunning = false;
+    snipCameraButton.setVisibility(View.VISIBLE);
+  }
 
 }
