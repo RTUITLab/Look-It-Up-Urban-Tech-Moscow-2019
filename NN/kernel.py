@@ -48,4 +48,4 @@ def no_background(image_path):
 
 
 if __name__ == '__main__':
-    result_image = no_background(path)
+    no_background(path)
