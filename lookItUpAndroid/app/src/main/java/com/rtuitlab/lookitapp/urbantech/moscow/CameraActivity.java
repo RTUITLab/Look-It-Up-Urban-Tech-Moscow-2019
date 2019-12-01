@@ -18,6 +18,7 @@ package com.rtuitlab.lookitapp.urbantech.moscow;
 
 import android.Manifest;
 import android.app.Fragment;
+import android.app.Person;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
@@ -50,10 +51,12 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.rtuitlab.lookitapp.urbantech.moscow.customview.ItemClassAdapter;
 import com.rtuitlab.lookitapp.urbantech.moscow.env.ImageUtils;
 
 
@@ -62,6 +65,7 @@ import java.util.List;
 
 import org.tensorflow.lite.examples.classification.R;
 
+import com.rtuitlab.lookitapp.urbantech.moscow.env.ItemClass;
 import com.rtuitlab.lookitapp.urbantech.moscow.env.Logger;
 
 public abstract class CameraActivity extends AppCompatActivity
@@ -194,9 +198,20 @@ public abstract class CameraActivity extends AppCompatActivity
       }
     });
 
+<<<<<<< Updated upstream
     // Создание адаптера и инициализация данных для заглушки
 
     //конец адаптера
+=======
+//<<<<<<< Updated upstream
+//=======
+    // Создание адаптера и инициализация данных для заглушки
+    ItemClassAdapter itemClassAdapter = new ItemClassAdapter(this, getDebugItemList());
+    ListView itemListView = (ListView) findViewById(R.id.listView);
+    itemListView.setAdapter(itemClassAdapter);
+    //конец адаптера
+//>>>>>>> Stashed changes
+>>>>>>> Stashed changes
   }
 
   protected int[] getRgbBytes() {
@@ -255,6 +270,17 @@ public abstract class CameraActivity extends AppCompatActivity
           }
         };
     }
+
+     private ItemClass[] getDebugItemList(){// дебаг данные для листа найденной одежды
+        ItemClass[] itemClasses = new ItemClass[5];
+
+        String[] classArr = {"Кофта", "Пальто", "Джинсы", "Кросовки", "Очки"};
+
+        for(int i = 0; i< itemClasses.length; i++ ){
+          itemClasses[i] = new ItemClass(classArr[i]);
+        }
+        return itemClasses;
+     }
 
   /** Callback for Camera2 API */
   @Override
@@ -498,6 +524,11 @@ public abstract class CameraActivity extends AppCompatActivity
 
   }
 
+<<<<<<< Updated upstream
+=======
+//<<<<<<< Updated upstream
+//=======
+>>>>>>> Stashed changes
   @Override
   public void onBackPressed() {
     super.onBackPressed();
@@ -505,8 +536,15 @@ public abstract class CameraActivity extends AppCompatActivity
     snipCameraButton.setVisibility(View.VISIBLE);
   }
 
+<<<<<<< Updated upstream
   public void CloseBottomBoard(View view){
     sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
   }
+=======
+  public void CloseBottomBoard(View view){// крестик в правом углу вылетающей панели
+    sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+  }
+//>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
 }

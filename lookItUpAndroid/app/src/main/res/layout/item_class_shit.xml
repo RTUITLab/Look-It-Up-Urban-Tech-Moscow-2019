@@ -1,13 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
+<<<<<<< Updated upstream
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+=======
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="false"
+    android:orientation="horizontal">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view2">
+
+        <ImageButton
+            android:id="@+id/arrow_right"
+            android:layout_width="37dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="182dp"
+            android:layout_marginEnd="47dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/arrow"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+>>>>>>> Stashed changes
 
         <RadioButton
             android:id="@+id/full_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+<<<<<<< Updated upstream
             android:layout_centerInParent="false"
             android:layout_centerHorizontal="false"
             android:layout_centerVertical="true"
@@ -37,3 +71,42 @@
         android:src="@drawable/arrow" />
 
     </RelativeLayout>
+=======
+            android:layout_marginStart="30dp"
+            android:button="@android:drawable/radiobutton_off_background"
+            android:buttonTint="@color/colorPrimaryDark"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv"
+            android:layout_width="261dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="182dp"
+            android:minWidth="30dp"
+            android:text="dwadawdwadawd"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/arrow_right"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/full_button"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.521" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/splitter"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/bar" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+>>>>>>> Stashed changes
