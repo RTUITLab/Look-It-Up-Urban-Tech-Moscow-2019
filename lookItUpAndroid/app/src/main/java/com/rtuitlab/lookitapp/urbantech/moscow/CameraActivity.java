@@ -38,6 +38,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
+
 import android.util.Size;
 import android.view.Surface;
 import android.view.View;
@@ -192,6 +194,9 @@ public abstract class CameraActivity extends AppCompatActivity
       }
     });
 
+    // Создание адаптера и инициализация данных для заглушки
+
+    //конец адаптера
   }
 
   protected int[] getRgbBytes() {
@@ -498,6 +503,10 @@ public abstract class CameraActivity extends AppCompatActivity
     super.onBackPressed();
     notCameraFragmentRunning = false;
     snipCameraButton.setVisibility(View.VISIBLE);
+  }
+
+  public void CloseBottomBoard(View view){
+    sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
   }
 
 }
