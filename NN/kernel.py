@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import tensorflow as tf
+import sys
 import numpy as np
+import tensorflow as tf
 
 interpreter = tf.lite.Interpreter(model_path='deeplabv3_257_mv_gpu.tflite')
 interpreter.allocate_tensors()
@@ -48,4 +49,4 @@ def no_background(image_path):
 
 
 if __name__ == '__main__':
-    no_background(path)
+    no_background(sys.argv[1])
