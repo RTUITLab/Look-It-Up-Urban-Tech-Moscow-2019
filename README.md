@@ -29,6 +29,8 @@ RTUITLab
 
 ![app demo](demo/demo.gif)
 
+Здесь вставлено демо, оно очень долго загружается :)
+
 [Android]:https://www.android.com/
 [Java]:https://www.java.com/
 [Python]:https://www.python.org/
