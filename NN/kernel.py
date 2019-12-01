@@ -4,15 +4,6 @@ import sys
 import numpy as np
 import tensorflow as tf
 
-interpreter = tf.lite.Interpreter(model_path='deeplabv3_257_mv_gpu.tflite')
-interpreter.allocate_tensors()
-input_data = interpreter.get_input_details()[0]
-output = interpreter.get_output_details()[0]
-output = interpreter.get_tensor(output['index'])
-output = output[0]
-
-image = None
-
 
 def load_and_preprocess_image(image_path):
     test_input_image = tf.keras.preprocessing.image.load_img(image_path)
@@ -30,8 +21,16 @@ def no_background(image_path):
     global output
     image = load_and_preprocess_image(image_path)
 
+    interpreter = tf.lite.Interpreter(model_path='deeplabv3_257_mv_gpu.tflite')
+    interpreter.allocate_tensors()
+    input_data = interpreter.get_input_details()[0]
+
     interpreter.set_tensor(input_data['index'], image)
     interpreter.invoke()
+
+    output = interpreter.get_output_details()[0]
+    output = interpreter.get_tensor(output['index'])
+    output = output[0]
 
     final = np.array([], dtype=np.float32)
     final = np.resize(final, (257, 257, 4))
@@ -50,3 +49,5 @@ def no_background(image_path):
 
 if __name__ == '__main__':
     no_background(sys.argv[1])
+    print('Finish')
+
