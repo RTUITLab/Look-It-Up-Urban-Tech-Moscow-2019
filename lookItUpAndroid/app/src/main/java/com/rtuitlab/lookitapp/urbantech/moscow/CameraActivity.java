@@ -52,6 +52,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -126,6 +127,7 @@ public abstract class CameraActivity extends AppCompatActivity
   private boolean notCameraFragmentRunning;
   private Image staticImage;
   private String SERVER_URL = "http://192.168.43.5:8000/img";
+  private FrameLayout container;
 
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
@@ -415,7 +417,7 @@ public abstract class CameraActivity extends AppCompatActivity
      private ItemClass[] getDebugItemList(){// дебаг данные для листа найденной одежды
         ItemClass[] itemClasses = new ItemClass[5];
 
-        String[] classArr = {"Кофта", "Пальто", "Джинсы", "Кросовки", "Очки"};
+        String[] classArr = {"Толстовка"};
 
         for(int i = 0; i< itemClasses.length; i++ ){
           itemClasses[i] = new ItemClass(classArr[i]);
@@ -639,6 +641,7 @@ public abstract class CameraActivity extends AppCompatActivity
     }
 
     getFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
+    container = (FrameLayout) findViewById(getLayoutId());
   }
 
   protected void fillBytes(final Plane[] planes, final byte[][] yuvBytes) {
