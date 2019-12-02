@@ -31,16 +31,21 @@
             android:id="@+id/textView"
             android:layout_width="114dp"
             android:layout_height="32dp"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center|center_horizontal|center_vertical"
             android:layout_weight="1"
             android:fontFamily="@font/roboto"
             android:gravity="center_horizontal|center_vertical"
             android:text="Найти одежду"
             android:textSize="13sp" />
 
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
         <ImageButton
             android:id="@+id/close_layout_bottom_button"
-            android:layout_width="113dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"

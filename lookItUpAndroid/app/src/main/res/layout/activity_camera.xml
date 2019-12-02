@@ -53,18 +53,18 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/semi_transparent" />
 
-            <Button
+            <ImageView
                 android:id="@+id/selectImageButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Choose From Gallery" />
+                android:layout_width="65dp"
+                android:layout_height="63dp"
+                android:layout_gravity="bottom|left"
+                android:layout_marginStart="45dp"
+                android:layout_marginBottom="30dp"
+                android:background="@android:drawable/ic_menu_gallery"
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:elevation="2dp"
+                android:textAlignment="viewStart" />
 
-            <Button
-                android:id="@+id/send_request"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:text="Send Request to Nikita" />
         </FrameLayout>
 
 

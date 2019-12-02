@@ -21,6 +21,8 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
@@ -30,18 +32,23 @@ import android.media.Image;
 import android.media.Image.Plane;
 import android.media.ImageReader;
 import android.media.ImageReader.OnImageAvailableListener;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.StrictMode;
 import android.os.Trace;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 
+import android.util.Base64;
 import android.util.Log;
 import android.util.Size;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -57,7 +64,10 @@ import com.rtuitlab.lookitapp.urbantech.moscow.env.ImageUtils;
 
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -80,7 +90,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
   private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
   public static final String TAG = "CameraAcrivity";
-  private static final int PICK_IMAGE_REQUEST_CODE = 1;
+  private static final int PICK_IMAGE_REQUEST_CODE = 2;
   protected int previewWidth = 0;
   protected int previewHeight = 0;
   private Handler handler;
@@ -102,11 +112,11 @@ public abstract class CameraActivity extends AppCompatActivity
       recognition1ValueTextView,
       recognition2ValueTextView;
   protected TextView frameValueTextView,
-      cropValueTextView,
-      cameraResolutionTextView,
+     cropValueTextView,
+     cameraResolutionTextView,
       rotationTextView,
       inferenceTimeTextView;
-  //protected ImageView bottomSheetArrowImageView;
+  protected ImageView bottomSheetArrowImageView;
   private ImageView plusImageView, minusImageView;
   private TextView threadsTextView;
   private ImageButton snipCameraButton;
@@ -114,14 +124,26 @@ public abstract class CameraActivity extends AppCompatActivity
 
   private FragmentManager fragmentManager;
   private boolean notCameraFragmentRunning;
+  private Image staticImage;
+  private String SERVER_URL = "http://192.168.43.5:8000/img";
 
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
     LOGGER.d("onCreate " + this);
     super.onCreate(null);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
     setContentView(R.layout.activity_camera);
+
+
+    //Allow http request
+    if (android.os.Build.VERSION.SDK_INT > 9)
+    {
+      StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+      StrictMode.setThreadPolicy(policy);
+    }
+    //Allow http request
+
+
     Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
     getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -197,7 +219,14 @@ public abstract class CameraActivity extends AppCompatActivity
       @Override
       public void onClick(View v) {
         sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        // запросить какие классы найдены и засетапить их в кнопки на layout_bottom_sheet
+        try {                   // листенер чтобы отправлять запрос
+          sendImageFromCam();   //отправить запрос с картинкой и открыть меню
+        }
+        catch (IOException e) {
+          e.printStackTrace();
+        }
+
+                              // TO:DO запросить какие классы найдены и засетапить их в кнопки на layout_bottom_sheet
 
       }
     });
@@ -208,35 +237,88 @@ public abstract class CameraActivity extends AppCompatActivity
     itemListView.setAdapter(itemClassAdapter);
     //конец адаптера
 
-    choiceFootFromGalleryAbilityAdd();//добавляет возможность звать в гости галлерею, результат обработается в onActivityResult
-    findViewById(R.id.send_request).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        try {
-          sendDebugImageFromCam(getRgbBytes());
-        }
-        catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    });
+    choicePhotoFromGalleryAbilityAdd();//добавляет возможность звать в гости галлерею, результат обработается в onActivityResult
+  }
 
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode == PICK_IMAGE_REQUEST_CODE && RESULT_OK == resultCode) {
+      try {
+        final Uri imageUri = data.getData();
+        final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+        final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+        Runnable process = new Runnable() {
+          @Override
+          public void run() {
+            final URL url;
+            Bitmap bitmap = ((TextureView)findViewById(R.id.texture)).getBitmap();
+            try {
+              url = new URL(SERVER_URL);
+              final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+              con.setRequestMethod("POST");
+              String base64String = Base64.encodeToString(getBytesFromBitmap(selectedImage),0);
+              base64String = base64String.replaceAll("\n","");
+              con.addRequestProperty("Img",base64String);
+              Log.v(TAG, base64String);
+              con.setDoOutput(true);
+
+              try (
+                      final BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+                String inputLine;
+                final StringBuilder content = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                  content.append(inputLine);
+                }
+                Log.v(TAG, content.toString());
+              } catch (final Exception ex) {
+                ex.printStackTrace();
+              }
+
+            }
+            catch (MalformedURLException e) { e.printStackTrace();}
+            catch (ProtocolException e)     { e.printStackTrace();}
+            catch (IOException e)           {e.printStackTrace();}
+
+          }
+        };
+        process.run();
+
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+        Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
+      }
+
+    }else {
+      Toast.makeText(this, "You haven't picked Image",Toast.LENGTH_LONG).show();
+    }
   }
 
 
-  private void sendDebugImageFromCam (int[] bytes) throws IOException {
+
+
+  // convert from bitmap to byte array
+  public byte[] getBytesFromBitmap(Bitmap bitmap) {
+    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
+    return stream.toByteArray();
+  }
+
+  private void sendImageFromCam() throws IOException {
     Runnable process = new Runnable() {
       @Override
       public void run() {
         final URL url;
+        Bitmap bitmap = ((TextureView)findViewById(R.id.texture)).getBitmap();
         try {
-          url = new URL("http://192.168.43.5:8000/img");
-        final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+          url = new URL(SERVER_URL);
+          final HttpURLConnection con = (HttpURLConnection) url.openConnection();
           con.setRequestMethod("POST");
-          con.addRequestProperty("Img",bytes.toString());
+          String base64String = Base64.encodeToString(getBytesFromBitmap(bitmap),0);
+          base64String = base64String.replaceAll("\n","");
+          con.addRequestProperty("Img",base64String);
+          Log.v(TAG, base64String);
           con.setDoOutput(true);
-
-          //con.getInputStream();
 
           try (
                   final BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
@@ -254,14 +336,12 @@ public abstract class CameraActivity extends AppCompatActivity
         catch (MalformedURLException e) { e.printStackTrace();}
         catch (ProtocolException e)     { e.printStackTrace();}
         catch (IOException e)           {e.printStackTrace();}
-
-
       }
     };
     process.run();
   }
 
-  private void choiceFootFromGalleryAbilityAdd(){ //поднятие вопроса к галлерее
+  private void choicePhotoFromGalleryAbilityAdd(){ //поднятие вопроса к галлерее
     findViewById(R.id.selectImageButton).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -355,7 +435,7 @@ public abstract class CameraActivity extends AppCompatActivity
     }
     try {
       final Image image = reader.acquireLatestImage();
-
+      staticImage = image;
       if (image == null) {
         return;
       }

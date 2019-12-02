@@ -1,4 +1,7 @@
 package com.rtuitlab.lookitapp.urbantech.moscow;
 
-public class ItemSearchFragment {
+import androidx.fragment.app.Fragment;
+
+public class ItemSearchFragment extends Fragment {
+
 }
