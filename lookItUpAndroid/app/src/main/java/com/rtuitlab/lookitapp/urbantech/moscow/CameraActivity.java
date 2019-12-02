@@ -52,6 +52,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -415,7 +416,7 @@ public abstract class CameraActivity extends AppCompatActivity
     }
 
      private ItemClass[] getDebugItemList(){// дебаг данные для листа найденной одежды
-        ItemClass[] itemClasses = new ItemClass[5];
+        ItemClass[] itemClasses = new ItemClass[1];
 
         String[] classArr = {"Толстовка"};
 
@@ -679,4 +680,9 @@ public abstract class CameraActivity extends AppCompatActivity
     sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
   }
 
+  public void ViewForResult(View v) {
+    Uri uri = Uri.parse("https://www.blakelyclothing.com/mens-clothing/sale/the-minnesota.htm"); // missing 'http://' will cause crashed
+    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+    startActivity(intent);
+  }
 }
